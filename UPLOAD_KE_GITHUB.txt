@@ -1,0 +1,12 @@
+CARA CEPAT
+==========
+1. Ekstrak ZIP ini.
+2. Buat repository GitHub baru.
+3. Upload semua isi folder hasil ekstrak ke repository (index.html harus berada di root).
+4. GitHub: Settings > Pages > Deploy from a branch > main > /(root) > Save.
+5. Tunggu sampai GitHub Pages memberi URL situs.
+
+CATATAN PROGRES
+================
+Versi siap-upload ini memakai localStorage. Artinya progres tersimpan pada browser/perangkat yang sama.
+Untuk progres lintas perangkat, tahap berikutnya dapat ditambahkan Firebase Firestore.

@@ -1,0 +1,21 @@
+AUDIT MOBILE — MPI SIKLUS CPU
+
+Fokus audit:
+- viewport/safe area
+- login layar pendek
+- navbar 320–430 px
+- modal
+- materi/video/kuis/HOTS/refleksi
+- CPU CRISIS portrait + landscape
+- Mode Fokus
+- localStorage
+
+Perbaikan:
+1. Navbar HP diganti menjadi hamburger + panel 2 kolom (1 kolom <=390 px).
+2. Judul dan padding card dikompakkan pada <=767 px.
+3. Modal memiliki max-height + scroll.
+4. Game HUD, stats, register, memory row, choice dan engine diperkecil secara responsif.
+5. Safe-area notch/home indicator ditangani dengan env(safe-area-inset-*).
+6. Klaim sinkronisasi Google Sheet/lintas perangkat yang tidak berlaku pada GitHub Pages dihapus/dikoreksi.
+7. Duplicate property `options` pada soal kuis #3 diperbaiki.
+8. Fullscreen API tetap tidak digunakan; Mode Fokus dipertahankan.

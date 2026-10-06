@@ -1,0 +1,33 @@
+AUDIT GITHUB PAGES — MPI SIKLUS CPU
+===================================
+
+Status: SIAP DIUPLOAD KE GITHUB PAGES
+
+Pemeriksaan:
+- index.html berada di root repository: OK
+- CSS lokal css/style.css tersedia: OK
+- JavaScript lokal js/app.js tersedia: OK
+- Template khusus Google Apps Script (<? ... ?>): TIDAK ADA
+- Tailwind CDN runtime: TIDAK ADA
+- ID HTML duplikat: TIDAK ADA
+- Referensi file lokal yang hilang: TIDAK ADA
+- Fungsi onclick utama tanpa definisi: TIDAK ADA
+- Sintaks JavaScript (node --check): LOLOS
+- Pilihan kelas IX-D: TIDAK ADA
+- Video YouTube ko5tV3hdgCw: TERPASANG
+- .nojekyll untuk GitHub Pages: TERSEDIA
+
+PENYIMPANAN PROGRES
+-------------------
+Versi ini menggunakan localStorage agar langsung dapat dipakai tanpa backend.
+Progres tersimpan pada browser/perangkat yang sama. GitHub Pages sendiri tidak
+menyediakan database. Sinkronisasi lintas perangkat dapat ditambahkan kemudian
+menggunakan Firebase Firestore tanpa mengganti GitHub Pages sebagai hosting.
+
+DEPENDENSI ONLINE
+-----------------
+- Google Fonts
+- Font Awesome
+- YouTube
+
+CSS utama aplikasi tidak lagi bergantung pada Tailwind CDN.

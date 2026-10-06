@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MPI Informatika - Siklus CPU</title>
+    <meta name="description" content="Media Pembelajaran Interaktif Informatika Kelas IX tentang mekanisme kerja CPU melalui siklus Fetch, Decode, dan Execute.">
+    <meta name="theme-color" content="#1d4ed8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- CSS statis untuk GitHub Pages (tanpa Tailwind CDN runtime) -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    </head>
+<body class="font-sans antialiased flex flex-col h-screen overflow-hidden">
+
+    <!-- Custom Modal Overlay -->
+    <div id="customModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hide opacity-0 transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-11/12 text-center transform scale-95 transition-transform duration-300" id="modalContent">
+            <div id="modalIcon" class="text-6xl mb-4"></div>
+            <h3 id="modalTitle" class="text-3xl font-bold text-slate-800 mb-2"></h3>
+            <p id="modalMessage" class="text-xl text-slate-600 mb-8"></p>
+            <button onclick="closeModal()" class="touch-target w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xl py-4 px-8 rounded-xl shadow-lg transition-colors">
+                Tutup & Lanjutkan
+            </button>
+        </div>
+    </div>
+
+    <!-- HALAMAN LOGIN (GATEWAY) -->
+    <div id="loginPage" class="login-page-scroll flex-1 flex items-center justify-center bg-gradient-to-br from-brand-900 to-brand-700 p-4 absolute inset-0 z-50">
+        <div class="login-card bg-white p-8 md:p-12 rounded-3xl shadow-2xl max-w-xl w-full text-center fade-in">
+            <div class="flex justify-center mb-6">
+                <div class="w-24 h-24 bg-brand-100 rounded-full flex items-center justify-center text-brand-600 text-5xl">
+                    <i class="fas fa-microchip"></i>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 mb-2 tracking-tight">Eksplorasi CPU</h1>
+            <p class="text-xl text-slate-500 mb-8">Media Pembelajaran Interaktif Informatika Kelas IX</p>
+            
+            <div class="space-y-6 text-left">
+                <div>
+                    <label class="block text-lg font-semibold text-slate-700 mb-2" for="studentName">Nama Lengkap</label>
+                    <input type="text" id="studentName" placeholder="Masukkan nama kamu..." class="touch-target w-full px-5 py-4 text-xl bg-white text-slate-900 placeholder:text-slate-400 caret-brand-600 border-2 border-slate-200 rounded-xl focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all outline-none" required autocomplete="name">
+                </div>
+                <div>
+                    <label class="block text-lg font-semibold text-slate-700 mb-2" for="studentCode">Kode Siswa / NIS</label>
+                    <input type="text" id="studentCode" placeholder="Contoh: 23104" maxlength="30" class="touch-target w-full px-5 py-4 text-xl bg-white text-slate-900 placeholder:text-slate-400 caret-brand-600 border-2 border-slate-200 rounded-xl focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all outline-none" required autocomplete="off">
+                    <p class="text-sm text-slate-500 mt-2">Kode ini membedakan progres siswa pada browser/perangkat ini. Penyimpanan lintas perangkat memerlukan database online.</p>
+                </div>
+                <div>
+                    <label class="block text-lg font-semibold text-slate-700 mb-2" for="studentClass">Kelas</label>
+                    <select id="studentClass" class="touch-target w-full px-5 py-4 text-xl border-2 border-slate-200 rounded-xl focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all outline-none bg-white text-slate-900">
+                        <option value="" disabled selected>Pilih Kelas...</option>
+                        <option value="IX-A">Kelas IX-A</option>
+                        <option value="IX-B">Kelas IX-B</option>
+                        <option value="IX-C">Kelas IX-C</option>
+                    </select>
+                </div>
+                <button onclick="startLearning()" class="touch-target w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-2xl py-5 rounded-xl shadow-xl shadow-brand-500/30 transform transition hover:-translate-y-1 mt-4">
+                    <i class="fas fa-rocket mr-2"></i> Mulai Petualangan Belajar
+                </button>
+                <p class="text-sm text-slate-500 text-center leading-relaxed">Progres saat ini disimpan pada browser perangkat ini. Gunakan Kode Siswa yang sama agar identitas progres tetap konsisten.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- APLIKASI UTAMA (Tersembunyi sebelum login) -->
+    <div id="mainApp" class="hide flex-col h-screen w-full bg-slate-50">
+        
+        <!-- Navbar responsif: desktop + menu mobile -->
+        <nav id="mainNavbar" class="glass-nav sticky top-0 z-40 px-4 py-3 md:px-8 md:py-4 flex justify-between items-center gap-2">
+            <div class="flex items-center gap-3 shrink-0">
+                <i class="fas fa-microchip text-3xl text-brand-600"></i>
+                <span class="font-bold text-2xl hidden md:block text-slate-800">CPU<span class="text-brand-600">Explorer</span></span>
+                <div class="mobile-nav-title md:hidden min-w-0">
+                    <div class="mobile-eyebrow uppercase tracking-wider text-slate-400 font-bold">CPU Explorer</div>
+                    <div id="mobileNavLabel" class="font-extrabold text-slate-800 truncate">Beranda</div>
+                </div>
+            </div>
+            
+            <!-- Navigasi desktop/tablet -->
+            <div id="mainNavScroll" class="desktop-nav flex-1 min-w-0 overflow-x-auto mx-2 md:mx-6 hide-scrollbar flex gap-2 justify-start px-1">
+                <button onclick="openTab('beranda')" class="nav-btn active-nav whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="beranda"><i class="fas fa-home"></i> Beranda</button>
+                <button onclick="openTab('materi')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="materi"><i class="fas fa-book-open"></i> Materi</button>
+                <button onclick="openTab('video')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="video"><i class="fas fa-play-circle"></i> Video</button>
+                <button onclick="openTab('kuis')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="kuis"><i class="fas fa-tasks"></i> Kuis</button>
+                <button onclick="openTab('hots')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="hots"><i class="fas fa-brain"></i> HOTS</button>
+                <button onclick="openTab('refleksi')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="refleksi"><i class="fas fa-mirror"></i> Refleksi</button>
+                <button id="navGameBtn" onclick="openTab('game')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-500 hover:bg-slate-100 transition-colors" data-target="game" title="Selesaikan pembelajaran untuk membuka CPU CRISIS"><i id="navGameIcon" class="fas fa-lock"></i> <span>Game</span></button>
+            </div>
+            
+            <div class="hidden lg:flex shrink-0 items-center gap-3 bg-brand-50 px-4 py-2 rounded-full border border-brand-100">
+                <i class="fas fa-user-circle text-2xl text-brand-600"></i>
+                <span id="displayUser" class="font-bold text-brand-800 text-lg">Siswa</span>
+            </div>
+
+            <button type="button" id="mobileMenuButton" class="mobile-menu-button md:hidden" aria-expanded="false" aria-controls="mobileNavPanel" onclick="toggleMobileNav()" title="Buka menu pembelajaran">
+                <i class="fas fa-bars" aria-hidden="true"></i><span class="sr-only">Menu</span>
+            </button>
+
+            <div id="mobileNavPanel" class="mobile-nav-panel hide md:hidden" aria-label="Menu pembelajaran">
+                <div class="mobile-user-card"><i class="fas fa-user-circle"></i><div class="min-w-0"><div id="mobileDisplayUser" class="font-bold truncate">Siswa</div><div class="text-xs text-slate-500">Pilih bagian pembelajaran</div></div></div>
+                <div class="mobile-nav-grid">
+                    <button class="mobile-nav-btn active" data-target="beranda" onclick="openTab('beranda')"><i class="fas fa-home"></i><span>Beranda</span></button>
+                    <button class="mobile-nav-btn" data-target="materi" onclick="openTab('materi')"><i class="fas fa-book-open"></i><span>Materi</span></button>
+                    <button class="mobile-nav-btn" data-target="video" onclick="openTab('video')"><i class="fas fa-play-circle"></i><span>Video</span></button>
+                    <button class="mobile-nav-btn" data-target="kuis" onclick="openTab('kuis')"><i class="fas fa-tasks"></i><span>Kuis</span></button>
+                    <button class="mobile-nav-btn" data-target="hots" onclick="openTab('hots')"><i class="fas fa-brain"></i><span>HOTS</span></button>
+                    <button class="mobile-nav-btn" data-target="refleksi" onclick="openTab('refleksi')"><i class="fas fa-mirror"></i><span>Refleksi</span></button>
+                    <button id="mobileGameBtn" class="mobile-nav-btn" data-target="game" onclick="openTab('game')"><i id="mobileGameIcon" class="fas fa-lock"></i><span>Game</span></button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Area Konten Utama -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="mainContentArea">
+            <div class="max-w-5xl mx-auto pb-24">
+                
+                <!-- MENU 1: BERANDA -->
+                <section id="beranda" class="tab-content fade-in">
+                    <div class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100 text-center relative overflow-hidden">
+                        <!-- Dekorasi background -->
+                        <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand-50 rounded-full blur-3xl opacity-60"></div>
+                        
+                        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-6 relative z-10" id="welcomeMessage">
+                            Halo, Pelajar Hebat!
+                        </h1>
+                        <p class="text-2xl text-slate-600 mb-10 max-w-3xl mx-auto relative z-10 leading-relaxed">
+                            Selamat datang di dunia internal komputer. Hari ini, kita akan membongkar rahasia bagaimana "otak" komputer berpikir dan bekerja dalam hitungan sepersekian detik!
+                        </p>
+                        
+                        <div class="bg-brand-50 border-l-8 border-brand-500 p-8 rounded-r-2xl text-left mb-12 shadow-sm">
+                            <h3 class="text-2xl font-bold text-brand-900 mb-3"><i class="fas fa-bullseye text-brand-500 mr-2"></i> Tujuan Pembelajaran</h3>
+                            <p class="text-xl text-brand-800 leading-relaxed">
+                                Setelah mengikuti petualangan ini, kamu diharapkan <strong>mampu menjelaskan mekanisme kerja internal CPU melalui siklus Fetch, Decode, dan Execute.</strong>
+                            </p>
+                        </div>
+
+
+                        <!-- Progress pembelajaran menuju game -->
+                        <div class="bg-slate-900 rounded-3xl p-6 md:p-8 text-left mb-10 shadow-xl relative z-10">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+                                <div>
+                                    <div class="text-cyan-300 font-bold uppercase tracking-wider text-sm mb-1">Misi Pembelajaran</div>
+                                    <h3 class="text-2xl md:text-3xl font-extrabold text-white">Buka Game CPU CRISIS</h3>
+                                    <p class="text-slate-300 text-lg mt-2">Selesaikan 5 tahap belajar. Game akan terbuka otomatis setelah semua tahap selesai.</p>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 text-center min-w-[150px]">
+                                    <div id="homeProgressCount" class="text-3xl font-extrabold text-cyan-300">0/5</div>
+                                    <div class="text-sm text-slate-400">tahap selesai</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden mb-5">
+                                <div id="homeProgressBar" class="bg-cyan-400 h-3 rounded-full transition-all duration-500" style="width:0%"></div>
+                            </div>
+                            <div id="homeProgressSteps" class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm"></div>
+                            <div class="mt-4 pt-4 border-t border-slate-700 text-sm">
+                                <div id="syncStatus" class="text-amber-300"><i class="fas fa-hard-drive mr-2"></i>Progres otomatis tersimpan di browser/perangkat ini.</div>
+                            </div>
+                        </div>
+
+                        <!-- Ilustrasi SVG CPU Sederhana -->
+                        <div class="flex justify-center mb-8 relative z-10">
+                            <svg width="240" height="240" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="15" y="15" width="70" height="70" rx="10" fill="#1e293b" />
+                                <rect x="25" y="25" width="50" height="50" rx="5" fill="#3b82f6" />
+                                <text x="50" y="52" font-family="Inter" font-size="14" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">CPU</text>
+                                <!-- Pin atas -->
+                                <rect x="20" y="5" width="4" height="10" fill="#94a3b8" /><rect x="35" y="5" width="4" height="10" fill="#94a3b8" />
+                                <rect x="50" y="5" width="4" height="10" fill="#94a3b8" /><rect x="65" y="5" width="4" height="10" fill="#94a3b8" />
+                                <rect x="80" y="5" width="4" height="10" fill="#94a3b8" />
+                                <!-- Pin bawah -->
+                                <rect x="20" y="85" width="4" height="10" fill="#94a3b8" /><rect x="35" y="85" width="4" height="10" fill="#94a3b8" />
+                                <rect x="50" y="85" width="4" height="10" fill="#94a3b8" /><rect x="65" y="85" width="4" height="10" fill="#94a3b8" />
+                                <rect x="80" y="85" width="4" height="10" fill="#94a3b8" />
+                                <!-- Pin kiri -->
+                                <rect x="5" y="20" width="10" height="4" fill="#94a3b8" /><rect x="5" y="35" width="10" height="4" fill="#94a3b8" />
+                                <rect x="5" y="50" width="10" height="4" fill="#94a3b8" /><rect x="5" y="65" width="10" height="4" fill="#94a3b8" />
+                                <rect x="5" y="80" width="10" height="4" fill="#94a3b8" />
+                                <!-- Pin kanan -->
+                                <rect x="85" y="20" width="10" height="4" fill="#94a3b8" /><rect x="85" y="35" width="10" height="4" fill="#94a3b8" />
+                                <rect x="85" y="50" width="10" height="4" fill="#94a3b8" /><rect x="85" y="65" width="10" height="4" fill="#94a3b8" />
+                                <rect x="85" y="80" width="10" height="4" fill="#94a3b8" />
+                            </svg>
+                        </div>
+                        
+                        <button onclick="openTab('materi')" class="touch-target inline-block bg-brand-600 hover:bg-brand-700 text-white font-bold text-2xl py-4 px-10 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                            Mulai Belajar <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- MENU 2: MATERI POKOK -->
+                <section id="materi" class="tab-content hide">
+                    <h2 class="text-4xl font-bold text-slate-800 mb-8 border-b-4 border-brand-500 pb-4 inline-block">Bagaimana CPU Menjalankan Instruksi?</h2>
+
+                    <!-- Pengantar -->
+                    <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 text-xl text-slate-700 leading-relaxed">
+                        <p class="mb-5">
+                            CPU (<em>Central Processing Unit</em>) adalah pusat pemrosesan yang menjalankan instruksi dari program. Saat kamu mengetik huruf, membuka aplikasi, menghitung dengan kalkulator, atau memainkan game, CPU tidak langsung "menebak" apa yang harus dilakukan. CPU bekerja dengan mengikuti instruksi yang tersimpan di memori secara teratur dan berulang.
+                        </p>
+                        <p class="mb-5">
+                            Pola kerja tersebut disebut <strong>siklus instruksi CPU</strong>. Untuk tingkat ini, kita mempelajari tiga tahap utamanya: <strong>Fetch</strong> (mengambil instruksi), <strong>Decode</strong> (memahami instruksi), dan <strong>Execute</strong> (menjalankan instruksi).
+                        </p>
+                        <div class="bg-brand-50 border-l-8 border-brand-500 rounded-r-2xl p-6 text-brand-900">
+                            <p class="font-bold mb-2"><i class="fas fa-key mr-2"></i>Ide penting:</p>
+                            <p>CPU mengerjakan instruksi <strong>satu demi satu dalam urutan yang sangat cepat</strong>. Setelah satu instruksi selesai diproses, CPU kembali mengambil instruksi berikutnya dan mengulangi siklus yang sama.</p>
+                        </div>
+                    </div>
+
+                    <!-- Komponen yang terlibat -->
+                    <div class="bg-slate-900 rounded-3xl p-8 md:p-10 text-white mb-10 shadow-xl">
+                        <h3 class="text-3xl font-bold mb-3"><i class="fas fa-puzzle-piece text-cyan-400 mr-3"></i>Siapa Saja yang Terlibat?</h3>
+                        <p class="text-xl text-slate-300 mb-8 leading-relaxed">Agar Fetch–Decode–Execute berjalan, CPU bekerja sama dengan beberapa bagian berikut.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-cyan-400 text-3xl mb-3"><i class="fas fa-memory"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">RAM</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Tempat sementara bagi program, data, dan instruksi yang sedang digunakan komputer.</p>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-violet-400 text-3xl mb-3"><i class="fas fa-traffic-light"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">Control Unit (CU)</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Mengatur aliran kerja CPU: mengambil instruksi, menafsirkan perintah, dan mengarahkan komponen yang harus bekerja.</p>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-emerald-400 text-3xl mb-3"><i class="fas fa-calculator"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">ALU</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Melakukan operasi aritmetika dan logika, misalnya penjumlahan, perbandingan, AND, atau OR.</p>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-amber-400 text-3xl mb-3"><i class="fas fa-list-ol"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">Program Counter (PC)</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Register khusus yang menunjukkan alamat instruksi berikutnya yang perlu diambil dari memori.</p>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-pink-400 text-3xl mb-3"><i class="fas fa-inbox"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">Instruction Register (IR)</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Tempat sementara di dalam CPU untuk menahan instruksi yang baru saja diambil dan sedang diproses.</p>
+                            </div>
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                                <div class="text-blue-400 text-3xl mb-3"><i class="fas fa-road"></i></div>
+                                <h4 class="text-2xl font-bold mb-2">Bus</h4>
+                                <p class="text-lg text-slate-300 leading-relaxed">Jalur komunikasi yang membawa alamat, data, dan sinyal kontrol antara CPU, RAM, serta komponen lain.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alur visual -->
+                    <div class="bg-white rounded-3xl p-8 md:p-10 shadow-lg border border-slate-100 mb-10">
+                        <h3 class="text-3xl font-bold text-slate-800 mb-3"><i class="fas fa-route text-brand-600 mr-3"></i>Gambaran Besar Siklus CPU</h3>
+                        <p class="text-xl text-slate-600 mb-8 leading-relaxed">Bayangkan CPU sedang menjalankan satu instruksi. Alurnya dapat disederhanakan seperti berikut:</p>
+                        <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
+                            <div class="flex-1 bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center">
+                                <div class="text-blue-600 text-4xl mb-3"><i class="fas fa-download"></i></div>
+                                <div class="font-extrabold text-2xl text-blue-900">1. FETCH</div>
+                                <div class="text-lg text-blue-800 mt-2">Cari dan ambil instruksi</div>
+                            </div>
+                            <div class="hidden lg:block text-3xl text-slate-400"><i class="fas fa-arrow-right"></i></div>
+                            <div class="lg:hidden text-3xl text-slate-400 text-center"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex-1 bg-purple-50 border-2 border-purple-200 rounded-2xl p-6 text-center">
+                                <div class="text-purple-600 text-4xl mb-3"><i class="fas fa-language"></i></div>
+                                <div class="font-extrabold text-2xl text-purple-900">2. DECODE</div>
+                                <div class="text-lg text-purple-800 mt-2">Pahami arti instruksi</div>
+                            </div>
+                            <div class="hidden lg:block text-3xl text-slate-400"><i class="fas fa-arrow-right"></i></div>
+                            <div class="lg:hidden text-3xl text-slate-400 text-center"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex-1 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 text-center">
+                                <div class="text-emerald-600 text-4xl mb-3"><i class="fas fa-play"></i></div>
+                                <div class="font-extrabold text-2xl text-emerald-900">3. EXECUTE</div>
+                                <div class="text-lg text-emerald-800 mt-2">Jalankan tindakan</div>
+                            </div>
+                            <div class="hidden lg:block text-3xl text-slate-400"><i class="fas fa-rotate"></i></div>
+                        </div>
+                        <p class="text-lg text-slate-500 mt-6 text-center"><strong>Selesai satu instruksi?</strong> CPU kembali ke Fetch untuk mengambil instruksi berikutnya.</p>
+                    </div>
+
+                    <!-- Detail Fetch -->
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-blue-100 mb-8">
+                        <div class="bg-blue-600 px-8 py-6 text-white flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl font-extrabold">1</div>
+                            <div>
+                                <h3 class="text-3xl font-extrabold">FETCH — Mengambil Instruksi</h3>
+                                <p class="text-xl text-blue-100 mt-1">CPU mencari instruksi berikutnya di memori.</p>
+                            </div>
+                        </div>
+                        <div class="p-8 md:p-10 text-xl text-slate-700 leading-relaxed">
+                            <p class="mb-6">Tahap Fetch dimulai karena CPU harus mengetahui <strong>instruksi mana yang harus dikerjakan berikutnya</strong>. Untuk itu, CPU menggunakan Program Counter (PC).</p>
+                            <ol class="space-y-4 list-decimal pl-8 mb-7">
+                                <li><strong>Program Counter (PC)</strong> menyimpan alamat instruksi berikutnya.</li>
+                                <li><strong>Control Unit</strong> mengirim alamat tersebut menuju RAM melalui jalur komunikasi.</li>
+                                <li>RAM membaca alamat itu lalu mengirimkan instruksinya kembali ke CPU.</li>
+                                <li>Instruksi yang diterima disimpan sementara di <strong>Instruction Register (IR)</strong>.</li>
+                                <li>Program Counter kemudian disiapkan untuk menunjuk instruksi berikutnya.</li>
+                            </ol>
+                            <div class="bg-blue-50 border-l-8 border-blue-500 p-6 rounded-r-2xl">
+                                <p><strong>Dengan bahasa sederhana:</strong> Fetch adalah saat CPU bertanya, <em>“Instruksi apa yang harus saya kerjakan sekarang?”</em>, lalu mengambil instruksi itu dari RAM.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Decode -->
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-purple-100 mb-8">
+                        <div class="bg-purple-600 px-8 py-6 text-white flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl font-extrabold">2</div>
+                            <div>
+                                <h3 class="text-3xl font-extrabold">DECODE — Memahami Instruksi</h3>
+                                <p class="text-xl text-purple-100 mt-1">Control Unit menentukan apa arti instruksi dan apa yang dibutuhkan.</p>
+                            </div>
+                        </div>
+                        <div class="p-8 md:p-10 text-xl text-slate-700 leading-relaxed">
+                            <p class="mb-6">Instruksi yang sudah berada di IR masih berupa <strong>kode mesin</strong>. Pada tahap Decode, Control Unit tidak mengubahnya menjadi bahasa mesin—karena instruksinya memang sudah dalam bentuk mesin. Tugas CU adalah <strong>menafsirkan pola kode tersebut</strong> dan menghasilkan sinyal kontrol yang sesuai.</p>
+                            <ol class="space-y-4 list-decimal pl-8 mb-7">
+                                <li>CU membaca instruksi yang ada di Instruction Register.</li>
+                                <li>CU mengenali <strong>operasi</strong> yang diminta, misalnya tambah, bandingkan, pindahkan, baca, atau simpan data.</li>
+                                <li>CU menentukan <strong>data mana</strong> yang diperlukan untuk menjalankan operasi.</li>
+                                <li>CU mengarahkan bagian yang relevan—misalnya ALU, register, memori, atau unit lainnya—untuk bersiap bekerja.</li>
+                            </ol>
+                            <div class="bg-purple-50 border-l-8 border-purple-500 p-6 rounded-r-2xl">
+                                <p><strong>Dengan bahasa sederhana:</strong> Decode adalah saat CPU bertanya, <em>“Perintah ini menyuruh saya melakukan apa, dan data apa yang saya perlukan?”</em></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Execute -->
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-emerald-100 mb-10">
+                        <div class="bg-emerald-600 px-8 py-6 text-white flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl font-extrabold">3</div>
+                            <div>
+                                <h3 class="text-3xl font-extrabold">EXECUTE — Menjalankan Instruksi</h3>
+                                <p class="text-xl text-emerald-100 mt-1">CPU melakukan tindakan yang sudah ditentukan pada tahap Decode.</p>
+                            </div>
+                        </div>
+                        <div class="p-8 md:p-10 text-xl text-slate-700 leading-relaxed">
+                            <p class="mb-6">Pada tahap Execute, tindakan benar-benar dilakukan. <strong>Tidak semua instruksi dikerjakan oleh ALU</strong>; bagian yang bekerja bergantung pada jenis perintahnya.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
+                                <div class="bg-emerald-50 rounded-2xl p-6 border border-emerald-200">
+                                    <h4 class="font-bold text-emerald-900 mb-2">Jika instruksinya menghitung</h4>
+                                    <p class="text-lg">ALU dapat melakukan penjumlahan, pengurangan, perbandingan, atau operasi logika.</p>
+                                </div>
+                                <div class="bg-emerald-50 rounded-2xl p-6 border border-emerald-200">
+                                    <h4 class="font-bold text-emerald-900 mb-2">Jika instruksinya memindahkan data</h4>
+                                    <p class="text-lg">CPU mengatur perpindahan data antara register, RAM, atau bagian lain yang diperlukan.</p>
+                                </div>
+                            </div>
+                            <p class="mb-6">Hasil eksekusi biasanya ditempatkan sementara di register, dapat dikirim kembali ke RAM, atau digunakan oleh instruksi berikutnya. Tahap penulisan kembali hasil ini sering disebut <em>write-back</em>. Istilah ini berbeda dari instruksi <strong>STORE</strong> pada game, yang secara khusus menyalin data dari register ke memori.</p>
+                            <div class="bg-emerald-50 border-l-8 border-emerald-500 p-6 rounded-r-2xl">
+                                <p><strong>Dengan bahasa sederhana:</strong> Execute adalah saat CPU berkata, <em>“Saya sudah paham perintahnya. Sekarang saya kerjakan.”</em></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contoh lengkap -->
+                    <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl overflow-hidden shadow-2xl text-white mb-10">
+                        <div class="px-8 py-7 border-b border-white/10">
+                            <h3 class="text-3xl font-bold"><i class="fas fa-flask text-yellow-300 mr-3"></i>Contoh Lengkap: CPU Menghitung 5 + 3</h3>
+                        </div>
+                        <div class="p-8 md:p-10">
+                            <p class="text-xl text-slate-200 leading-relaxed mb-8">Anggap sebuah program memiliki instruksi sederhana: <strong>“Tambahkan nilai 5 dan 3.”</strong> Berikut perjalanan satu instruksi tersebut.</p>
+                            <div class="space-y-5">
+                                <div class="flex gap-5 bg-white/10 p-6 rounded-2xl border border-white/10">
+                                    <div class="shrink-0 w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center font-extrabold text-xl">1</div>
+                                    <div>
+                                        <h4 class="text-2xl font-bold text-blue-200 mb-2">Fetch</h4>
+                                        <p class="text-xl text-slate-200">PC menunjukkan lokasi instruksi. CU mengambil instruksi dari RAM dan menaruhnya di Instruction Register.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-5 bg-white/10 p-6 rounded-2xl border border-white/10">
+                                    <div class="shrink-0 w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center font-extrabold text-xl">2</div>
+                                    <div>
+                                        <h4 class="text-2xl font-bold text-purple-200 mb-2">Decode</h4>
+                                        <p class="text-xl text-slate-200">CU membaca instruksi dan mengenali bahwa operasi yang diminta adalah <strong>penjumlahan</strong> dengan data 5 dan 3.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-5 bg-white/10 p-6 rounded-2xl border border-white/10">
+                                    <div class="shrink-0 w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center font-extrabold text-xl">3</div>
+                                    <div>
+                                        <h4 class="text-2xl font-bold text-emerald-200 mb-2">Execute</h4>
+                                        <p class="text-xl text-slate-200">Data 5 dan 3 diberikan kepada ALU. ALU melakukan penjumlahan dan menghasilkan <strong>8</strong>. Hasil ini kemudian dapat disimpan sementara atau digunakan oleh instruksi berikutnya.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-5 bg-white/10 p-6 rounded-2xl border border-white/10">
+                                    <div class="shrink-0 w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center font-extrabold text-xl"><i class="fas fa-rotate"></i></div>
+                                    <div>
+                                        <h4 class="text-2xl font-bold text-amber-200 mb-2">Ulangi</h4>
+                                        <p class="text-xl text-slate-200">CPU kembali ke tahap Fetch untuk memproses instruksi berikutnya. Inilah sebabnya disebut <strong>siklus</strong>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analogi Kontekstual -->
+                    <div class="bg-slate-800 rounded-3xl overflow-hidden shadow-2xl text-white mb-10">
+                        <div class="bg-slate-900 px-8 py-6 border-b border-slate-700">
+                            <h3 class="text-3xl font-bold flex items-center"><i class="fas fa-utensils text-orange-400 mr-4"></i>Analogi Restoran: Dari Pesanan sampai Masakan</h3>
+                        </div>
+                        <div class="p-8 md:p-10 text-xl leading-relaxed">
+                            <p class="mb-8 text-slate-300">Bayangkan CPU sebagai dapur restoran yang sangat sibuk. Instruksi komputer seperti pesanan pelanggan yang harus diproses satu demi satu.</p>
+
+                            <div class="space-y-6">
+                                <div class="flex flex-col md:flex-row md:items-center gap-6 bg-slate-700/50 p-6 rounded-2xl">
+                                    <div class="bg-blue-500 w-full md:w-40 text-center font-bold text-2xl py-3 px-6 rounded-xl shadow-lg">FETCH</div>
+                                    <p class="flex-1"><strong class="text-white">Mengambil pesanan berikutnya.</strong> Nomor antrean menunjukkan pesanan mana yang harus diambil. Pelayan membawa kertas pesanan dari tempat penyimpanan menuju dapur.</p>
+                                </div>
+
+                                <div class="flex flex-col md:flex-row md:items-center gap-6 bg-slate-700/50 p-6 rounded-2xl">
+                                    <div class="bg-purple-500 w-full md:w-40 text-center font-bold text-2xl py-3 px-6 rounded-xl shadow-lg">DECODE</div>
+                                    <p class="flex-1"><strong class="text-white">Kepala koki membaca dan memahami pesanan.</strong> Ia menentukan menu apa yang diminta, bahan apa yang diperlukan, dan siapa yang harus mengerjakannya.</p>
+                                </div>
+
+                                <div class="flex flex-col md:flex-row md:items-center gap-6 bg-slate-700/50 p-6 rounded-2xl">
+                                    <div class="bg-emerald-500 w-full md:w-40 text-center font-bold text-2xl py-3 px-6 rounded-xl shadow-lg">EXECUTE</div>
+                                    <p class="flex-1"><strong class="text-white">Pesanan dikerjakan.</strong> Koki yang tepat memasak, memotong, mencampur, atau menyiapkan makanan sesuai instruksi kepala koki.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 bg-orange-400/10 border border-orange-300/30 rounded-2xl p-6 text-orange-100">
+                                <p><strong>Ingat:</strong> analogi restoran membantu memahami konsep, tetapi CPU sebenarnya bekerja menggunakan kode biner, register, rangkaian elektronik, dan sinyal kontrol.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cek Pemahaman -->
+                    <div class="bg-white rounded-3xl p-8 md:p-10 shadow-lg border border-slate-100">
+                        <h3 class="text-3xl font-bold text-slate-800 mb-3"><i class="fas fa-circle-question text-brand-600 mr-3"></i>Cek Pemahaman Cepat</h3>
+                        <p class="text-xl text-slate-600 mb-6">Coba jawab dalam pikiranmu sebelum membuka jawabannya.</p>
+                        <div class="space-y-4 text-xl">
+                            <details class="border-2 border-slate-200 rounded-2xl p-5 bg-slate-50">
+                                <summary class="font-bold cursor-pointer">Mengapa CPU perlu melakukan Fetch terlebih dahulu?</summary>
+                                <p class="mt-4 text-slate-600">Karena CPU harus mengambil instruksi yang akan dikerjakan dari memori sebelum dapat memahami dan menjalankannya.</p>
+                            </details>
+                            <details class="border-2 border-slate-200 rounded-2xl p-5 bg-slate-50">
+                                <summary class="font-bold cursor-pointer">Apa perbedaan Decode dan Execute?</summary>
+                                <p class="mt-4 text-slate-600">Decode menentukan arti instruksi dan bagian yang perlu bekerja, sedangkan Execute benar-benar menjalankan tindakan yang diminta.</p>
+                            </details>
+                            <details class="border-2 border-slate-200 rounded-2xl p-5 bg-slate-50">
+                                <summary class="font-bold cursor-pointer">Mengapa disebut siklus?</summary>
+                                <p class="mt-4 text-slate-600">Karena setelah satu instruksi selesai, CPU kembali ke Fetch dan mengulangi pola Fetch–Decode–Execute untuk instruksi berikutnya.</p>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Gate checkpoint: Materi -->
+                    <div class="mt-8 bg-cyan-50 border-2 border-cyan-200 rounded-3xl p-7 md:p-8">
+                        <h3 class="text-2xl font-extrabold text-cyan-950 mb-2"><i class="fas fa-key text-cyan-600 mr-2"></i>Checkpoint Materi</h3>
+                        <p class="text-lg text-cyan-900 mb-6">Jawab 3 pertanyaan ini dengan benar untuk menandai tahap Materi sebagai selesai.</p>
+                        <div class="space-y-5 text-lg">
+                            <div>
+                                <label class="font-bold block mb-2" for="matCheck1">1. Urutan siklus CPU yang benar adalah...</label>
+                                <select id="matCheck1" class="w-full p-4 rounded-xl border-2 border-cyan-200 bg-white">
+                                    <option value="">Pilih jawaban</option><option value="fde">Fetch → Decode → Execute</option><option value="def">Decode → Execute → Fetch</option><option value="fed">Fetch → Execute → Decode</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="font-bold block mb-2" for="matCheck2">2. Register yang menunjukkan alamat instruksi berikutnya adalah...</label>
+                                <select id="matCheck2" class="w-full p-4 rounded-xl border-2 border-cyan-200 bg-white">
+                                    <option value="">Pilih jawaban</option><option value="alu">ALU</option><option value="pc">Program Counter (PC)</option><option value="ram">RAM</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="font-bold block mb-2" for="matCheck3">3. Pada tahap Decode, CPU terutama...</label>
+                                <select id="matCheck3" class="w-full p-4 rounded-xl border-2 border-cyan-200 bg-white">
+                                    <option value="">Pilih jawaban</option><option value="interpret">menafsirkan opcode/instruksi dan menentukan tindakan yang diperlukan</option><option value="save">menyimpan semua file secara permanen</option><option value="display">menampilkan gambar ke monitor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="btnCompleteMaterial" onclick="completeMaterialCheckpoint()" class="touch-target mt-6 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xl py-4 px-7 rounded-xl">
+                            <i class="fas fa-check-double mr-2"></i> Selesaikan Tahap Materi
+                        </button>
+                        <p id="materialCheckpointStatus" class="mt-3 font-semibold text-slate-600"></p>
+                    </div>
+                </section>
+
+                <!-- MENU 3: VIDEO PEMBELAJARAN -->
+                <section id="video" class="tab-content hide">
+                    <h2 class="text-4xl font-bold text-slate-800 mb-6 border-b-4 border-brand-500 pb-4 inline-block">Video Pembelajaran: Siklus Fetch–Decode–Execute</h2>
+
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8 flex items-start gap-4">
+                        <i class="fas fa-lightbulb text-4xl text-amber-500 mt-1"></i>
+                        <div>
+                            <h4 class="text-2xl font-bold text-amber-900 mb-2">Fokus saat menonton:</h4>
+                            <p class="text-xl text-amber-800 mb-3">Video berbahasa Indonesia ini menjelaskan siklus <strong>Fetch, Decode, Execute</strong> secara berurutan dan sejalan dengan materi utama pada MPI.</p>
+                            <ul class="text-lg text-amber-900 list-disc pl-6 space-y-1">
+                                <li>Perhatikan bagaimana instruksi diambil dari memori pada tahap Fetch.</li>
+                                <li>Perhatikan bagaimana CPU memahami instruksi pada tahap Decode.</li>
+                                <li>Perhatikan bagaimana instruksi dijalankan pada tahap Execute.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!--
+                        CATATAN KOMPATIBILITAS:
+                        YouTube mewajibkan HTTP Referer untuk pemutar tertanam. Ketika MPI dibuka
+                        langsung sebagai file://, sebagian perangkat/browser dapat menampilkan Error 153.
+                        Karena itu, JavaScript di bawah hanya mengaktifkan iframe jika halaman dijalankan
+                        melalui http/https. Pada mode file lokal ditampilkan pratinjau + tombol YouTube.
+                    -->
+                    <div class="bg-slate-900 rounded-3xl p-4 md:p-6 shadow-2xl">
+                        <div id="videoEmbedMode" class="hide">
+                            <div class="relative w-full overflow-hidden rounded-2xl bg-black" style="padding-top: 56.25%;">
+                                <iframe
+                                    id="cpuVideoFrame"
+                                    class="absolute top-0 left-0 w-full h-full"
+                                    data-src="https://www.youtube-nocookie.com/embed/ko5tV3hdgCw?rel=0&modestbranding=1"
+                                    title="Siklus Instruksi di Dalam CPU - Bahasa Indonesia"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+
+                        <div id="videoLocalMode" class="hide">
+                            <div class="relative overflow-hidden rounded-2xl bg-black">
+                                <img
+                                    src="https://img.youtube.com/vi/ko5tV3hdgCw/hqdefault.jpg"
+                                    alt="Pratinjau video Siklus Instruksi di Dalam CPU"
+                                    class="w-full aspect-video object-cover opacity-80"
+                                    loading="lazy">
+                                <div class="absolute inset-0 flex items-center justify-center p-5 bg-slate-950/35">
+                                    <a href="https://www.youtube.com/watch?v=ko5tV3hdgCw"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="touch-target inline-flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xl md:text-2xl px-7 py-4 rounded-2xl shadow-2xl transition-transform hover:scale-105 text-center">
+                                        <i class="fab fa-youtube text-3xl"></i>
+                                        Tonton Video Siklus Instruksi CPU
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 bg-slate-800 border border-slate-700 rounded-2xl p-5 text-slate-200">
+                                <p class="text-lg leading-relaxed"><strong class="text-white"><i class="fas fa-info-circle mr-2"></i>Mengapa video dibuka di YouTube?</strong> MPI ini sedang dijalankan sebagai file lokal. Pada mode ini YouTube dapat memblokir video tertanam karena tidak menerima identitas halaman (HTTP Referer). Tombol di atas menghindari layar error dan membuka video secara normal.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 mt-6 text-lg text-slate-600">
+                        <p class="mb-2"><strong>Video pilihan guru:</strong> Siklus Instruksi di Dalam CPU</p>
+                        <p class="mb-4"><strong>Tautan:</strong> YouTube &nbsp;•&nbsp; <strong>Fokus MPI:</strong> Fetch, Decode, Execute</p>
+                        <a href="https://www.youtube.com/watch?v=ko5tV3hdgCw"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition-colors">
+                            <i class="fab fa-youtube"></i> Buka langsung di YouTube
+                        </a>
+                    </div>
+
+                    <!-- Gate checkpoint: Video -->
+                    <div class="mt-8 bg-amber-50 border-2 border-amber-200 rounded-3xl p-7 md:p-8">
+                        <h3 class="text-2xl font-extrabold text-amber-950 mb-2"><i class="fas fa-video text-amber-600 mr-2"></i>Checkpoint Video</h3>
+                        <p class="text-lg text-amber-900 mb-6">Setelah menonton, gunakan checkpoint ini untuk memastikan konsep utamanya tertangkap.</p>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <select id="vidCheck1" class="p-4 rounded-xl border-2 border-amber-200 bg-white"><option value="">Fetch berarti...</option><option value="take">mengambil instruksi</option><option value="run">menjalankan instruksi</option></select>
+                            <select id="vidCheck2" class="p-4 rounded-xl border-2 border-amber-200 bg-white"><option value="">Decode berarti...</option><option value="interpret">menafsirkan instruksi</option><option value="store">menyimpan file</option></select>
+                            <select id="vidCheck3" class="p-4 rounded-xl border-2 border-amber-200 bg-white"><option value="">Execute berarti...</option><option value="perform">menjalankan tindakan</option><option value="fetch">mengambil alamat</option></select>
+                        </div>
+                        <button id="btnCompleteVideo" onclick="completeVideoCheckpoint()" class="touch-target mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xl py-4 px-7 rounded-xl"><i class="fas fa-check mr-2"></i> Selesaikan Tahap Video</button>
+                        <p id="videoCheckpointStatus" class="mt-3 font-semibold text-slate-600"></p>
+                    </div>
+                </section>
+
+                <!-- MENU 4: LATIHAN SOAL / KUIS -->
+                <section id="kuis" class="tab-content hide">
+                    <div class="flex justify-between items-center mb-8 border-b-4 border-brand-500 pb-4">
+                        <h2 class="text-4xl font-bold text-slate-800">Latihan Soal Uji Konsep</h2>
+                        <span class="bg-brand-100 text-brand-800 font-bold py-2 px-6 rounded-full text-xl shadow-sm">15 Soal</span>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-8 mb-8 text-xl text-slate-600 border border-slate-200 shadow-sm">
+                        Pilih satu jawaban yang paling tepat dengan menyentuh atau mengklik pada pilihan jawaban di bawah ini.
+                    </div>
+
+                    <!-- Wadah Soal Digenerate oleh JS -->
+                    <div id="quizContainer" class="space-y-8 mb-10"></div>
+
+                    <button onclick="calculateQuizScore()" class="touch-target w-full md:w-auto bg-brand-600 hover:bg-brand-700 text-white font-bold text-2xl py-5 px-12 rounded-xl shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center gap-3 mx-auto">
+                        <i class="fas fa-check-circle"></i> Cek Hasil Kuis Saya
+                    </button>
+                </section>
+
+                <!-- MENU 5: ASESMEN HOTS -->
+                <section id="hots" class="tab-content hide">
+                    <h2 class="text-4xl font-bold text-slate-800 mb-6 border-b-4 border-red-500 pb-4 inline-block">Asesmen HOTS (Studi Kasus)</h2>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
+                        <h4 class="text-2xl font-bold text-red-900 mb-2"><i class="fas fa-brain text-red-600 mr-2"></i> Tantangan Pemikiran Kritis</h4>
+                        <p class="text-xl text-red-800">Bagian ini memerlukan analisis yang mendalam. Jawablah 5 skenario di bawah ini dengan menganalisis masalah yang terjadi pada siklus CPU.</p>
+                    </div>
+
+                    <!-- Wadah Soal HOTS -->
+                    <div id="hotsContainer" class="space-y-8 mb-10"></div>
+                    
+                    <button onclick="submitHots()" class="touch-target w-full bg-red-600 hover:bg-red-700 text-white font-bold text-2xl py-5 rounded-xl shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center gap-3">
+                        <i class="fas fa-paper-plane"></i> Kirim Jawaban Analisis HOTS
+                    </button>
+                </section>
+
+                <!-- MENU 6: REFLEKSI DIRI -->
+                <section id="refleksi" class="tab-content hide">
+                    <div class="text-center mb-10">
+                        <h2 class="text-4xl font-bold text-slate-800 mb-4 inline-block relative">
+                            Saatnya Berkaca
+                            <div class="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                        </h2>
+                        <p class="text-xl text-slate-600 max-w-2xl mx-auto mt-4">Jawablah pertanyaan di bawah ini dengan jujur untuk membantu mengembangkan gaya belajarmu selanjutnya.</p>
+                    </div>
+
+                    <div class="space-y-8 bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-slate-100">
+                        <!-- Pertanyaan Refleksi 1 -->
+                        <div>
+                            <label class="block text-2xl font-bold text-slate-800 mb-4" for="refleksi1">
+                                1. Bagian mana dari siklus kerja CPU ini yang menurutmu paling sulit dibayangkan? Mengapa?
+                            </label>
+                            <textarea id="refleksi1" rows="4" class="touch-target w-full p-5 text-xl bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition outline-none resize-none" placeholder="Ketik refleksimu di sini..."></textarea>
+                        </div>
+                        
+                        <!-- Pertanyaan Refleksi 2 -->
+                        <div>
+                            <label class="block text-2xl font-bold text-slate-800 mb-4" for="refleksi2">
+                                2. Strategi apa yang kamu gunakan untuk memahami materi ini hari ini? (Misal: menganalogi dengan koki, menonton video berulang, dsb)
+                            </label>
+                            <textarea id="refleksi2" rows="4" class="touch-target w-full p-5 text-xl bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition outline-none resize-none" placeholder="Ketik strategimu di sini..."></textarea>
+                        </div>
+
+                        <!-- Pertanyaan Refleksi 3 -->
+                        <div>
+                            <label class="block text-2xl font-bold text-slate-800 mb-4" for="refleksi3">
+                                3. Apa yang akan kamu lakukan di pertemuan selanjutnya agar belajarmu lebih efektif?
+                            </label>
+                            <textarea id="refleksi3" rows="4" class="touch-target w-full p-5 text-xl bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition outline-none resize-none" placeholder="Ketik rencana perbaikanmu di sini..."></textarea>
+                        </div>
+
+                        <button onclick="submitRefleksi()" class="touch-target w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-2xl py-6 rounded-xl shadow-xl transition-transform transform hover:scale-105 mt-4">
+                            <i class="fas fa-book mr-2"></i> Kumpulkan Jurnal Refleksi
+                        </button>
+                    </div>
+                </section>
+
+                <!-- MENU 7: GAME CPU CRISIS -->
+                <section id="game" class="tab-content hide">
+                    <!-- Locked state -->
+                    <div id="gameLockPanel" class="bg-white border border-slate-200 rounded-3xl p-7 md:p-10 shadow-lg">
+                        <div class="text-center max-w-3xl mx-auto">
+                            <div class="w-24 h-24 rounded-full bg-slate-900 text-rose-300 flex items-center justify-center text-4xl mx-auto mb-5 shadow-xl"><i class="fas fa-lock"></i></div>
+                            <h2 class="text-4xl font-extrabold text-slate-900 mb-3">CPU CRISIS Masih Terkunci</h2>
+                            <p class="text-xl text-slate-600 leading-relaxed mb-8">Mission Control adalah hadiah setelah seluruh pembelajaran selesai. Tuntaskan tahap yang masih terkunci untuk memperoleh akses.</p>
+                            <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden mb-3"><div id="gameGateBar" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width:0%"></div></div>
+                            <div id="gameGateCount" class="font-bold text-slate-600 mb-7">0 dari 5 tahap selesai</div>
+                            <div id="gameGateSteps" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-left"></div>
+                            <button onclick="goToNextIncompleteStep()" class="touch-target mt-8 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xl py-4 px-8 rounded-xl"><i class="fas fa-route mr-2"></i> Lanjutkan Pembelajaran</button>
+                        </div>
+                    </div>
+
+                    <!-- Unlocked game -->
+                    <div id="cyberGameApp" class="cyber-shell crisis-shell hide">
+                        <div class="cyber-inner p-5 md:p-8">
+                            <div class="crisis-banner p-5 mb-6 flex flex-col xl:flex-row gap-5 xl:items-center xl:justify-between">
+                                <div class="min-w-0">
+                                    <div class="text-rose-300 text-sm font-black tracking-[.18em]">EMERGENCY SIMULATION • UNLOCKED</div>
+                                    <h2 class="cyber-font text-2xl md:text-4xl font-black text-white mt-1">CPU CRISIS: MISSION CONTROL</h2>
+                                    <p class="text-slate-300 mt-2">Jalankan instruksi, jaga integritas sistem, dan pulihkan CPU sebelum seluruh inti gagal.</p>
+                                </div>
+                                <div class="flex flex-wrap gap-3 text-sm xl:justify-end">
+                                    <div class="crisis-stat"><span class="text-slate-400">Operator</span><br><strong id="gameHudName" class="text-white">-</strong></div>
+                                    <div class="crisis-stat"><span class="text-slate-400">Skor</span><br><strong id="gameHudScore" class="text-green-300">0000</strong></div>
+                                    <div class="crisis-stat"><span class="text-slate-400">Misi</span><br><strong id="gameHudLevel" class="text-cyan-300">-</strong></div>
+                                    <div class="crisis-stat min-w-[130px]"><span class="text-slate-400">Integritas</span><br><strong id="gameHudIntegrity" class="text-amber-300">100%</strong></div>
+                                    <button type="button" id="gameFocusBtn" onclick="toggleGameFocusMode()" class="cyber-btn px-4 py-3" title="Perbesar area game"><i class="fas fa-expand-arrows-alt mr-2"></i><span>MODE FOKUS</span></button>
+                                </div>
+                            </div>
+
+                            <!-- LANDING -->
+                            <div id="game-screen-landing" class="game-screen py-5 md:py-8">
+                                <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-6 items-stretch">
+                                    <div class="cyber-panel p-6 md:p-8">
+                                        <div class="text-rose-300 font-black tracking-widest mb-3"><i class="fas fa-triangle-exclamation mr-2"></i>STATUS: CORE UNSTABLE</div>
+                                        <h3 class="cyber-font text-3xl md:text-5xl font-black text-white mb-4">KAMU SEKARANG MENJADI CPU</h3>
+                                        <p class="text-lg text-slate-300 leading-relaxed mb-6">Berbeda dari game sebelumnya, kamu tidak sekadar mencocokkan jawaban. Kamu harus menjalankan <strong>program mini</strong> melalui Fetch, Decode, dan Execute sambil memantau <strong>PC, IR, register, ALU, dan memori</strong>.</p>
+                                        <div class="grid sm:grid-cols-3 gap-3 mb-7">
+                                            <div class="crisis-register"><span class="text-cyan-300 font-bold">FETCH</span><small class="block text-slate-500 mt-1">Pilih alamat sesuai PC</small></div>
+                                            <div class="crisis-register"><span class="text-purple-300 font-bold">DECODE</span><small class="block text-slate-500 mt-1">Tafsirkan instruksi</small></div>
+                                            <div class="crisis-register"><span class="text-green-300 font-bold">EXECUTE</span><small class="block text-slate-500 mt-1">Tentukan perubahan state</small></div>
+                                        </div>
+                                        <button onclick="startCpuCrisis()" class="cyber-btn cyber-font text-lg px-8"><i class="fas fa-bolt mr-2"></i> MASUK MISSION CONTROL</button>
+                                    </div>
+                                    <div class="cyber-panel p-6 md:p-8">
+                                        <div class="mobile-game-hint"><i class="fas fa-mobile-screen-button mr-2"></i>HP didukung. Untuk area kerja lebih lebar, gunakan Mode Fokus; landscape opsional.</div>
+                                        <div class="text-yellow-300 font-black mb-4">ATURAN DARURAT</div>
+                                        <div class="space-y-4 text-slate-300">
+                                            <div class="flex gap-3"><span class="crisis-badge text-green-300">+100</span><p>Keputusan benar menambah skor dan membangun <strong>combo</strong>.</p></div>
+                                            <div class="flex gap-3"><span class="crisis-badge text-rose-300">−15%</span><p>Keputusan salah mengurangi <strong>integritas CPU</strong>. Integritas 0% = misi gagal.</p></div>
+                                            <div class="flex gap-3"><span class="crisis-badge text-yellow-300">HINT</span><p>Petunjuk tetap tersedia, tetapi mengurangi skor dan peluang memperoleh 3 bintang.</p></div>
+                                            <div class="flex gap-3"><span class="crisis-badge text-cyan-300">5 MISI</span><p>Misi terakhir menggabungkan seluruh mekanik menjadi <strong>Boss Program</strong>.</p></div>
+                                        </div>
+                                        <div class="mt-6 text-xs text-slate-500 border-t border-slate-700 pt-4">Set instruksi pada game adalah CPU imajiner untuk pembelajaran. Sintaksnya disederhanakan agar konsep siklus instruksi mudah diamati.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MISSION MAP -->
+                            <div id="game-screen-map" class="game-screen hide py-3">
+                                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+                                    <div><div class="text-rose-300 text-sm font-black tracking-widest">MISSION SELECT</div><h3 class="cyber-font text-3xl font-bold text-white mt-1">RUANG KONTROL CPU</h3><p class="text-slate-400 mt-2">Misi terbuka berurutan. Setiap misi menguji bentuk penalaran yang berbeda.</p></div>
+                                    <div class="text-sm text-slate-400">Best score: <strong id="gameBestScore" class="text-green-300">0</strong></div>
+                                </div>
+                                <div id="gameLevelMap" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                            </div>
+
+                            <!-- GAMEPLAY -->
+                            <div id="game-screen-play" class="game-screen hide py-2">
+                                <div class="cyber-panel p-5 mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                    <div class="min-w-0"><div id="gamePlayTag" class="text-rose-300 font-black text-sm tracking-widest">MISI</div><h3 id="gamePlayTitle" class="cyber-font text-2xl font-bold text-white mt-1"></h3><p id="gamePlayObjective" class="text-slate-400 mt-2"></p></div>
+                                    <div class="flex flex-wrap gap-2"><span id="gameCombo" class="crisis-badge crisis-combo">COMBO ×0</span><button onclick="gameShowHint()" class="cyber-btn cyber-btn-yellow"><i class="fas fa-lightbulb mr-2"></i>HINT</button><button onclick="gameShowMap()" class="cyber-btn"><i class="fas fa-table-cells-large mr-2"></i>MISI</button></div>
+                                </div>
+                                <div class="crisis-integrity-track mb-4"><div id="gameIntegrityBar" class="crisis-integrity-fill" style="width:100%"></div></div>
+                                <div id="gameEngine" class="cyber-panel p-4 md:p-6 min-h-[420px]"></div>
+                            </div>
+
+                            <!-- COMPLETE -->
+                            <div id="game-screen-complete" class="game-screen hide text-center py-10">
+                                <div class="text-7xl text-green-300 mb-5"><i class="fas fa-shield-halved"></i></div>
+                                <div class="text-green-300 font-black tracking-widest mb-2">SYSTEM RECOVERY 100%</div>
+                                <h3 class="cyber-font text-4xl md:text-5xl font-black text-white mb-4">CPU CRISIS RESOLVED</h3>
+                                <p class="text-xl text-slate-300 mb-7">Kamu berhasil menelusuri state CPU, menemukan glitch, dan menjalankan Boss Program sampai selesai.</p>
+                                <div class="cyber-panel max-w-2xl mx-auto p-6 mb-7"><div class="grid grid-cols-2 md:grid-cols-3 gap-4"><div><div class="text-slate-400">Skor Akhir</div><div id="gameFinalScore" class="text-4xl font-black text-green-300">0</div></div><div><div class="text-slate-400">Misi</div><div class="text-4xl font-black text-cyan-300">5/5</div></div><div class="col-span-2 md:col-span-1"><div class="text-slate-400">Peringkat</div><div id="gameFinalRank" class="text-2xl font-black text-yellow-300 mt-2">CPU OPERATOR</div></div></div></div>
+                                <div class="flex flex-wrap justify-center gap-3"><button onclick="gameShowMap()" class="cyber-btn"><i class="fas fa-table-cells-large mr-2"></i>Lihat Misi</button><button onclick="resetCyberGame()" class="cyber-btn cyber-btn-purple"><i class="fas fa-rotate-right mr-2"></i>Reset Game</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
