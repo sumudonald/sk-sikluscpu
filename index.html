@@ -27,8 +27,8 @@
             <div id="modalIcon" class="text-6xl mb-4"></div>
             <h3 id="modalTitle" class="text-3xl font-bold text-slate-800 mb-2"></h3>
             <p id="modalMessage" class="text-xl text-slate-600 mb-8"></p>
-            <button onclick="closeModal()" class="touch-target w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xl py-4 px-8 rounded-xl shadow-lg transition-colors">
-                Tutup & Lanjutkan
+            <button id="modalActionButton" onclick="closeModal()" class="touch-target w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xl py-4 px-8 rounded-xl shadow-lg transition-colors">
+                <i class="fas fa-arrow-right mr-2"></i>Tutup & Lanjutkan
             </button>
         </div>
     </div>
@@ -93,7 +93,7 @@
                 <button onclick="openTab('kuis')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="kuis"><i class="fas fa-tasks"></i> Kuis</button>
                 <button onclick="openTab('hots')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="hots"><i class="fas fa-brain"></i> HOTS</button>
                 <button onclick="openTab('refleksi')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-600 hover:bg-slate-100 transition-colors" data-target="refleksi"><i class="fas fa-mirror"></i> Refleksi</button>
-                <button id="navGameBtn" onclick="openTab('game')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-500 hover:bg-slate-100 transition-colors" data-target="game" title="Selesaikan pembelajaran untuk membuka CPU CRISIS"><i id="navGameIcon" class="fas fa-lock"></i> <span>Game</span></button>
+                <button id="navGameBtn" onclick="openTab('game')" class="nav-btn whitespace-nowrap px-4 py-3 md:px-6 md:py-3 rounded-xl font-semibold text-lg flex items-center gap-2 text-slate-500 hover:bg-slate-100 transition-colors" data-target="game" title="Selesaikan pembelajaran untuk membuka CPU QUEST 3D"><i id="navGameIcon" class="fas fa-lock"></i> <span>Game</span></button>
             </div>
             
             <div class="hidden lg:flex shrink-0 items-center gap-3 bg-brand-50 px-4 py-2 rounded-full border border-brand-100">
@@ -149,7 +149,7 @@
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
                                 <div>
                                     <div class="text-cyan-300 font-bold uppercase tracking-wider text-sm mb-1">Misi Pembelajaran</div>
-                                    <h3 class="text-2xl md:text-3xl font-extrabold text-white">Buka Game CPU CRISIS</h3>
+                                    <h3 class="text-2xl md:text-3xl font-extrabold text-white">Buka Game CPU QUEST 3D</h3>
                                     <p class="text-slate-300 text-lg mt-2">Selesaikan 5 tahap belajar. Game akan terbuka otomatis setelah semua tahap selesai.</p>
                                 </div>
                                 <div class="bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4 text-center min-w-[150px]">
@@ -645,14 +645,14 @@
                     </div>
                 </section>
 
-                <!-- MENU 7: GAME CPU CRISIS -->
+                <!-- MENU 7: GAME CPU QUEST 3D -->
                 <section id="game" class="tab-content hide">
                     <!-- Locked state -->
                     <div id="gameLockPanel" class="bg-white border border-slate-200 rounded-3xl p-7 md:p-10 shadow-lg">
                         <div class="text-center max-w-3xl mx-auto">
                             <div class="w-24 h-24 rounded-full bg-slate-900 text-rose-300 flex items-center justify-center text-4xl mx-auto mb-5 shadow-xl"><i class="fas fa-lock"></i></div>
-                            <h2 class="text-4xl font-extrabold text-slate-900 mb-3">CPU CRISIS Masih Terkunci</h2>
-                            <p class="text-xl text-slate-600 leading-relaxed mb-8">Mission Control adalah hadiah setelah seluruh pembelajaran selesai. Tuntaskan tahap yang masih terkunci untuk memperoleh akses.</p>
+                            <h2 class="text-4xl font-extrabold text-slate-900 mb-3">CPU QUEST 3D Masih Terkunci</h2>
+                            <p class="text-xl text-slate-600 leading-relaxed mb-8">CPU QUEST 3D adalah hadiah setelah seluruh pembelajaran selesai. Tuntaskan tahap yang masih terkunci untuk memperoleh akses.</p>
                             <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden mb-3"><div id="gameGateBar" class="bg-cyan-500 h-4 rounded-full transition-all duration-500" style="width:0%"></div></div>
                             <div id="gameGateCount" class="font-bold text-slate-600 mb-7">0 dari 5 tahap selesai</div>
                             <div id="gameGateSteps" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-left"></div>
@@ -660,80 +660,43 @@
                         </div>
                     </div>
 
-                    <!-- Unlocked game -->
-                    <div id="cyberGameApp" class="cyber-shell crisis-shell hide">
-                        <div class="cyber-inner p-5 md:p-8">
-                            <div class="crisis-banner p-5 mb-6 flex flex-col xl:flex-row gap-5 xl:items-center xl:justify-between">
-                                <div class="min-w-0">
-                                    <div class="text-rose-300 text-sm font-black tracking-[.18em]">EMERGENCY SIMULATION • UNLOCKED</div>
-                                    <h2 class="cyber-font text-2xl md:text-4xl font-black text-white mt-1">CPU CRISIS: MISSION CONTROL</h2>
-                                    <p class="text-slate-300 mt-2">Jalankan instruksi, jaga integritas sistem, dan pulihkan CPU sebelum seluruh inti gagal.</p>
-                                </div>
-                                <div class="flex flex-wrap gap-3 text-sm xl:justify-end">
-                                    <div class="crisis-stat"><span class="text-slate-400">Operator</span><br><strong id="gameHudName" class="text-white">-</strong></div>
-                                    <div class="crisis-stat"><span class="text-slate-400">Skor</span><br><strong id="gameHudScore" class="text-green-300">0000</strong></div>
-                                    <div class="crisis-stat"><span class="text-slate-400">Misi</span><br><strong id="gameHudLevel" class="text-cyan-300">-</strong></div>
-                                    <div class="crisis-stat min-w-[130px]"><span class="text-slate-400">Integritas</span><br><strong id="gameHudIntegrity" class="text-amber-300">100%</strong></div>
-                                    <button type="button" id="gameFocusBtn" onclick="toggleGameFocusMode()" class="cyber-btn px-4 py-3" title="Perbesar area game"><i class="fas fa-expand-arrows-alt mr-2"></i><span>MODE FOKUS</span></button>
-                                </div>
+                    <!-- Unlocked game: CPU QUEST 3D -->
+                    <div id="cyberGameApp" class="cpuquest-shell hide">
+                        <div class="cpuquest-toolbar">
+                            <div class="min-w-0">
+                                <div class="cpuquest-kicker"><i class="fas fa-unlock mr-2"></i>LEARNING REWARD • OPEN WORLD 3D</div>
+                                <h2 class="cpuquest-title">CPU QUEST 3D — Petualangan di Dalam Prosesor</h2>
+                                <p class="cpuquest-subtitle">Jelajahi Bank RAM, Jalur Bus, Zona Decode, Register Bank, dan ALU Core sambil menyelesaikan tantangan Fetch–Decode–Execute.</p>
                             </div>
+                            <div class="cpuquest-actions">
+                                <button type="button" id="gameFocusBtn" onclick="toggleGameFocusMode()" class="cpuquest-action-btn"><i class="fas fa-expand-arrows-alt mr-2"></i><span>MODE FOKUS</span></button>
+                                <button type="button" onclick="openCpuQuestNewTab()" class="cpuquest-action-btn cpuquest-action-secondary"><i class="fas fa-up-right-from-square mr-2"></i>BUKA TAB PENUH</button>
+                            </div>
+                        </div>
 
-                            <!-- LANDING -->
-                            <div id="game-screen-landing" class="game-screen py-5 md:py-8">
-                                <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-6 items-stretch">
-                                    <div class="cyber-panel p-6 md:p-8">
-                                        <div class="text-rose-300 font-black tracking-widest mb-3"><i class="fas fa-triangle-exclamation mr-2"></i>STATUS: CORE UNSTABLE</div>
-                                        <h3 class="cyber-font text-3xl md:text-5xl font-black text-white mb-4">KAMU SEKARANG MENJADI CPU</h3>
-                                        <p class="text-lg text-slate-300 leading-relaxed mb-6">Berbeda dari game sebelumnya, kamu tidak sekadar mencocokkan jawaban. Kamu harus menjalankan <strong>program mini</strong> melalui Fetch, Decode, dan Execute sambil memantau <strong>PC, IR, register, ALU, dan memori</strong>.</p>
-                                        <div class="grid sm:grid-cols-3 gap-3 mb-7">
-                                            <div class="crisis-register"><span class="text-cyan-300 font-bold">FETCH</span><small class="block text-slate-500 mt-1">Pilih alamat sesuai PC</small></div>
-                                            <div class="crisis-register"><span class="text-purple-300 font-bold">DECODE</span><small class="block text-slate-500 mt-1">Tafsirkan instruksi</small></div>
-                                            <div class="crisis-register"><span class="text-green-300 font-bold">EXECUTE</span><small class="block text-slate-500 mt-1">Tentukan perubahan state</small></div>
-                                        </div>
-                                        <button onclick="startCpuCrisis()" class="cyber-btn cyber-font text-lg px-8"><i class="fas fa-bolt mr-2"></i> MASUK MISSION CONTROL</button>
-                                    </div>
-                                    <div class="cyber-panel p-6 md:p-8">
-                                        <div class="mobile-game-hint"><i class="fas fa-mobile-screen-button mr-2"></i>HP didukung. Untuk area kerja lebih lebar, gunakan Mode Fokus; landscape opsional.</div>
-                                        <div class="text-yellow-300 font-black mb-4">ATURAN DARURAT</div>
-                                        <div class="space-y-4 text-slate-300">
-                                            <div class="flex gap-3"><span class="crisis-badge text-green-300">+100</span><p>Keputusan benar menambah skor dan membangun <strong>combo</strong>.</p></div>
-                                            <div class="flex gap-3"><span class="crisis-badge text-rose-300">−15%</span><p>Keputusan salah mengurangi <strong>integritas CPU</strong>. Integritas 0% = misi gagal.</p></div>
-                                            <div class="flex gap-3"><span class="crisis-badge text-yellow-300">HINT</span><p>Petunjuk tetap tersedia, tetapi mengurangi skor dan peluang memperoleh 3 bintang.</p></div>
-                                            <div class="flex gap-3"><span class="crisis-badge text-cyan-300">5 MISI</span><p>Misi terakhir menggabungkan seluruh mekanik menjadi <strong>Boss Program</strong>.</p></div>
-                                        </div>
-                                        <div class="mt-6 text-xs text-slate-500 border-t border-slate-700 pt-4">Set instruksi pada game adalah CPU imajiner untuk pembelajaran. Sintaksnya disederhanakan agar konsep siklus instruksi mudah diamati.</div>
-                                    </div>
+                        <div id="cpuQuestIntro" class="cpuquest-intro">
+                            <div class="cpuquest-intro-main">
+                                <div class="cpuquest-badge">⚙️ GAME BARU</div>
+                                <h3>Masuk ke dunia 3D di dalam CPU</h3>
+                                <p>Kamu bergerak sebagai operator di dalam prosesor, menemukan instruksi di RAM, melewati jalur bus, mengaktifkan decoder, memulihkan register, lalu menyelesaikan Boss Program pada ALU Core.</p>
+                                <div class="cpuquest-feature-grid">
+                                    <div><strong>FETCH</strong><span>PC, RAM, IR</span></div>
+                                    <div><strong>DECODE</strong><span>Control Unit & opcode</span></div>
+                                    <div><strong>EXECUTE</strong><span>Register & ALU</span></div>
+                                    <div><strong>OPEN WORLD</strong><span>WASD / joystick HP</span></div>
                                 </div>
+                                <button type="button" onclick="launchCpuQuest3D()" class="cpuquest-start-btn"><i class="fas fa-gamepad mr-2"></i>MULAI CPU QUEST 3D</button>
                             </div>
+                            <div class="cpuquest-intro-side">
+                                <div class="cpuquest-orb"><i class="fas fa-microchip"></i></div>
+                                <div class="cpuquest-mini-title">PROGRES GAME</div>
+                                <div id="cpuQuestSummary" class="cpuquest-summary">Belum dimainkan pada sesi ini.</div>
+                                <p class="cpuquest-note">Identitas Nama, Kode Siswa/NIS, dan Kelas dari MPI akan diteruskan otomatis ke game.</p>
+                            </div>
+                        </div>
 
-                            <!-- MISSION MAP -->
-                            <div id="game-screen-map" class="game-screen hide py-3">
-                                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
-                                    <div><div class="text-rose-300 text-sm font-black tracking-widest">MISSION SELECT</div><h3 class="cyber-font text-3xl font-bold text-white mt-1">RUANG KONTROL CPU</h3><p class="text-slate-400 mt-2">Misi terbuka berurutan. Setiap misi menguji bentuk penalaran yang berbeda.</p></div>
-                                    <div class="text-sm text-slate-400">Best score: <strong id="gameBestScore" class="text-green-300">0</strong></div>
-                                </div>
-                                <div id="gameLevelMap" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
-                            </div>
-
-                            <!-- GAMEPLAY -->
-                            <div id="game-screen-play" class="game-screen hide py-2">
-                                <div class="cyber-panel p-5 mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                    <div class="min-w-0"><div id="gamePlayTag" class="text-rose-300 font-black text-sm tracking-widest">MISI</div><h3 id="gamePlayTitle" class="cyber-font text-2xl font-bold text-white mt-1"></h3><p id="gamePlayObjective" class="text-slate-400 mt-2"></p></div>
-                                    <div class="flex flex-wrap gap-2"><span id="gameCombo" class="crisis-badge crisis-combo">COMBO ×0</span><button onclick="gameShowHint()" class="cyber-btn cyber-btn-yellow"><i class="fas fa-lightbulb mr-2"></i>HINT</button><button onclick="gameShowMap()" class="cyber-btn"><i class="fas fa-table-cells-large mr-2"></i>MISI</button></div>
-                                </div>
-                                <div class="crisis-integrity-track mb-4"><div id="gameIntegrityBar" class="crisis-integrity-fill" style="width:100%"></div></div>
-                                <div id="gameEngine" class="cyber-panel p-4 md:p-6 min-h-[420px]"></div>
-                            </div>
-
-                            <!-- COMPLETE -->
-                            <div id="game-screen-complete" class="game-screen hide text-center py-10">
-                                <div class="text-7xl text-green-300 mb-5"><i class="fas fa-shield-halved"></i></div>
-                                <div class="text-green-300 font-black tracking-widest mb-2">SYSTEM RECOVERY 100%</div>
-                                <h3 class="cyber-font text-4xl md:text-5xl font-black text-white mb-4">CPU CRISIS RESOLVED</h3>
-                                <p class="text-xl text-slate-300 mb-7">Kamu berhasil menelusuri state CPU, menemukan glitch, dan menjalankan Boss Program sampai selesai.</p>
-                                <div class="cyber-panel max-w-2xl mx-auto p-6 mb-7"><div class="grid grid-cols-2 md:grid-cols-3 gap-4"><div><div class="text-slate-400">Skor Akhir</div><div id="gameFinalScore" class="text-4xl font-black text-green-300">0</div></div><div><div class="text-slate-400">Misi</div><div class="text-4xl font-black text-cyan-300">5/5</div></div><div class="col-span-2 md:col-span-1"><div class="text-slate-400">Peringkat</div><div id="gameFinalRank" class="text-2xl font-black text-yellow-300 mt-2">CPU OPERATOR</div></div></div></div>
-                                <div class="flex flex-wrap justify-center gap-3"><button onclick="gameShowMap()" class="cyber-btn"><i class="fas fa-table-cells-large mr-2"></i>Lihat Misi</button><button onclick="resetCyberGame()" class="cyber-btn cyber-btn-purple"><i class="fas fa-rotate-right mr-2"></i>Reset Game</button></div>
-                            </div>
+                        <div id="cpuQuestFrameWrap" class="cpuquest-frame-wrap hide">
+                            <iframe id="cpuQuestFrame" title="CPU QUEST 3D — Petualangan di Dalam Prosesor" loading="eager" allow="fullscreen; autoplay" allowfullscreen></iframe>
                         </div>
                     </div>
                 </section>

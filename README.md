@@ -1,33 +1,18 @@
-# MPI Siklus CPU — GitHub Pages Mobile Ready
+# MPI Siklus CPU + CPU QUEST 3D
 
-Versi ini diaudit untuk laptop, tablet, dan HP (portrait/landscape).
+Versi GitHub Pages ini menggabungkan Media Pembelajaran Interaktif Siklus CPU dengan game open-world **CPU QUEST 3D — Petualangan di Dalam Prosesor**.
 
-## Struktur
+## Alur siswa
+Materi → Video → Kuis → HOTS → Refleksi → CPU QUEST 3D. Game tetap terkunci sampai 5 tahap pembelajaran selesai.
 
-```text
-index.html
-css/style.css
-js/app.js
-.nojekyll
-```
+## Struktur penting
+- `index.html` — MPI utama
+- `css/style.css` — tampilan MPI dan shell game
+- `js/app.js` — progres pembelajaran dan integrasi game
+- `game/cpu-quest-3d.html` — game 3D open-world
 
-## Upload
+## Upload GitHub Pages
+Upload seluruh isi folder ini ke root repository. Jangan memindahkan folder `game`, `css`, atau `js`. GitHub Pages dapat tetap menggunakan branch `main` dan `/(root)`.
 
-Upload seluruh isi folder ke root repository GitHub. Aktifkan **Settings → Pages → Deploy from a branch → main → /(root)**.
-
-## Perbaikan mobile
-
-- Login dapat discroll pada layar pendek dan memakai safe area/notch.
-- Navbar HP memakai menu hamburger; navbar desktop tetap horizontal.
-- Judul, card, tombol, kuis, HOTS, refleksi, dan modal diskalakan untuk lebar 320–430 px.
-- CPU CRISIS dioptimalkan untuk portrait; landscape bersifat opsional.
-- Mode Fokus tetap tersedia tanpa Fullscreen API.
-- Video YouTube tetap responsif.
-
-## Penyimpanan progres
-
-GitHub Pages adalah hosting statis. Versi ini menyimpan progres di **localStorage browser/perangkat**. Kode Siswa/NIS digunakan untuk membedakan data progres pada perangkat tersebut, tetapi belum menyinkronkan progres antarperangkat. Untuk itu diperlukan database online (misalnya Firebase/Supabase).
-
-## Setelah mengganti file di GitHub
-
-Tunggu deployment Pages selesai lalu lakukan hard refresh (`Ctrl+F5` pada desktop). Di HP, tutup tab lama atau hapus cache halaman jika perubahan belum terlihat.
+## Catatan
+CPU QUEST 3D memakai Three.js dari CDN jsDelivr saat game dimuat, sehingga game memerlukan koneksi internet. Progres MPI dan game disimpan di localStorage browser.

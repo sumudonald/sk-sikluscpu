@@ -21,6 +21,8 @@
         const PROGRESS_SCHEMA_VERSION = 3;
         let learningProgress = createDefaultProgress();
         let activeProgressKey = '';
+        let modalAfterCloseAction = null;
+        let modalActionLabel = 'Tutup & Lanjutkan';
 
         let syncTimer = null;
         let syncInFlight = false;
@@ -303,7 +305,7 @@
             learningProgress[key] = true;
             saveLearningProgress({ event: wasDone ? '' : `STEP_${String(key).toUpperCase()}`, forceServer: !wasDone });
             if (!wasUnlocked && isGameUnlocked()) {
-                showModal('CPU CRISIS Terbuka!', `Selamat ${studentData.name}! Semua tahap pembelajaran selesai. Mission Control sekarang sudah dapat dimainkan.`, 'success');
+                showModal('CPU QUEST 3D Terbuka!', `Selamat ${studentData.name}! Semua tahap pembelajaran selesai. Petualangan 3D di dalam prosesor sekarang sudah dapat dimainkan.`, 'success');
             }
         }
 
@@ -323,13 +325,13 @@
             const navIcon = document.getElementById('navGameIcon');
             const navBtn = document.getElementById('navGameBtn');
             if (navIcon) navIcon.className = `fas ${isGameUnlocked() ? 'fa-gamepad' : 'fa-lock'}`;
-            if (navBtn) navBtn.title = isGameUnlocked() ? 'CPU CRISIS sudah terbuka' : `Game terkunci: ${done}/5 tahap selesai`;
+            if (navBtn) navBtn.title = isGameUnlocked() ? 'CPU QUEST 3D sudah terbuka' : `Game terkunci: ${done}/5 tahap selesai`;
             const mobileGameIcon = document.getElementById('mobileGameIcon');
             const mobileGameBtn = document.getElementById('mobileGameBtn');
             if (mobileGameIcon) mobileGameIcon.className = `fas ${isGameUnlocked() ? 'fa-gamepad' : 'fa-lock'}`;
             if (mobileGameBtn) {
                 mobileGameBtn.classList.toggle('game-unlocked', isGameUnlocked());
-                mobileGameBtn.title = isGameUnlocked() ? 'CPU CRISIS sudah terbuka' : `Game terkunci: ${done}/5 tahap selesai`;
+                mobileGameBtn.title = isGameUnlocked() ? 'CPU QUEST 3D sudah terbuka' : `Game terkunci: ${done}/5 tahap selesai`;
             }
 
             const gateBar = document.getElementById('gameGateBar');
@@ -344,9 +346,21 @@
                 </button>`).join('');
 
             const materialStatus = document.getElementById('materialCheckpointStatus');
+            const materialButton = document.getElementById('btnCompleteMaterial');
             if (materialStatus && learningProgress.material) materialStatus.innerHTML = '<span class="text-green-700"><i class="fas fa-circle-check mr-2"></i>Tahap Materi sudah selesai.</span>';
+            if (materialButton) {
+                materialButton.innerHTML = learningProgress.material
+                    ? '<i class="fas fa-arrow-right mr-2"></i> Lanjut ke Video'
+                    : '<i class="fas fa-check-double mr-2"></i> Selesaikan Tahap Materi';
+            }
             const videoStatus = document.getElementById('videoCheckpointStatus');
+            const videoButton = document.getElementById('btnCompleteVideo');
             if (videoStatus && learningProgress.video) videoStatus.innerHTML = '<span class="text-green-700"><i class="fas fa-circle-check mr-2"></i>Tahap Video sudah selesai.</span>';
+            if (videoButton) {
+                videoButton.innerHTML = learningProgress.video
+                    ? '<i class="fas fa-arrow-right mr-2"></i> Lanjut ke Kuis'
+                    : '<i class="fas fa-check mr-2"></i> Selesaikan Tahap Video';
+            }
 
             const savedReflection = learningProgress.reflectionText || {};
             const rr1 = document.getElementById('refleksi1');
@@ -366,17 +380,31 @@
         }
 
         function completeMaterialCheckpoint() {
+            if (learningProgress.material) { openTab('video'); return; }
             const ok = document.getElementById('matCheck1').value === 'fde' && document.getElementById('matCheck2').value === 'pc' && document.getElementById('matCheck3').value === 'interpret';
             if (!ok) { showModal('Checkpoint belum tepat', 'Ada jawaban yang belum tepat. Baca kembali bagian Fetch, Decode, Execute dan komponen CPU, lalu coba lagi.', 'warning'); return; }
             markLearningStep('material');
-            showModal('Materi Selesai', 'Checkpoint benar. Tahap Materi ditandai selesai dan progres game bertambah.', 'success');
+            showModal(
+                'Materi Selesai',
+                'Checkpoint benar. Tahap Materi selesai. Setelah menutup pesan ini, kamu akan lanjut ke Video.',
+                'success',
+                () => openTab('video'),
+                'Lanjut ke Video'
+            );
         }
 
         function completeVideoCheckpoint() {
+            if (learningProgress.video) { openTab('kuis'); return; }
             const ok = document.getElementById('vidCheck1').value === 'take' && document.getElementById('vidCheck2').value === 'interpret' && document.getElementById('vidCheck3').value === 'perform';
             if (!ok) { showModal('Checkpoint video belum tepat', 'Periksa kembali arti Fetch, Decode, dan Execute. Kamu boleh membuka video lagi lalu mencoba checkpoint.', 'warning'); return; }
             markLearningStep('video');
-            showModal('Video Selesai', 'Checkpoint video benar. Tahap Video ditandai selesai.', 'success');
+            showModal(
+                'Video Selesai',
+                'Checkpoint video benar. Setelah menutup pesan ini, kamu akan lanjut ke Kuis.',
+                'success',
+                () => openTab('kuis'),
+                'Lanjut ke Kuis'
+            );
         }
 
 
@@ -746,7 +774,13 @@
                 icon = "warning";
             }
 
-            showModal(`Skor Kamu: ${finalScore}`, message, icon);
+            showModal(
+                `Skor Kamu: ${finalScore}`,
+                `${message} Setelah menutup pesan ini, kamu akan lanjut ke HOTS.`,
+                icon,
+                () => openTab('hots'),
+                'Lanjut ke HOTS'
+            );
         }
 
         function renderHots() {
@@ -819,8 +853,10 @@
             saveLearningProgress({ event: 'HOTS_ATTEMPT', forceServer: true });
             showModal(
                 "Analisis HOTS Selesai!",
-                `${studentData.name}, kamu menjawab benar ${correct} dari ${hotsData.length} kasus. Progres tersimpan pada browser/perangkat ini.`,
-                "success"
+                `${studentData.name}, kamu menjawab benar ${correct} dari ${hotsData.length} kasus. Setelah menutup pesan ini, kamu akan lanjut ke Refleksi.`,
+                "success",
+                () => openTab('refleksi'),
+                'Lanjut ke Refleksi'
             );
         }
 
@@ -839,8 +875,10 @@
             saveLearningProgress({ event: 'REFLECTION_SUBMIT', forceServer: true });
             showModal(
                 "Refleksi Selesai!",
-                `Terima kasih ${studentData.name}. Refleksimu tersimpan pada browser/perangkat ini.`,
-                "success"
+                `Terima kasih ${studentData.name}. Semua tahap pembelajaran selesai. Setelah menutup pesan ini, CPU QUEST 3D akan dibuka.`,
+                "success",
+                () => openTab('game'),
+                'Buka CPU QUEST 3D'
             );
         }
 
@@ -884,17 +922,79 @@
             const app = document.getElementById('cyberGameApp');
             if (!locked || !app) return;
             if (isGameUnlocked()) {
-                ensureCpuCrisisGameState();
-                const firstReveal = app.classList.contains('hide');
                 locked.classList.add('hide');
                 app.classList.remove('hide');
-                if (firstReveal) gameShowScreen('game-screen-landing');
-                updateGameHud();
+                updateCpuQuestSummary();
             } else {
                 app.classList.add('hide');
                 locked.classList.remove('hide');
             }
         }
+
+        function cpuQuestUrl() {
+            const params = new URLSearchParams({
+                name: studentData.name || '',
+                code: studentData.studentId || '',
+                class: studentData.class || 'IX-A'
+            });
+            return `game/cpu-quest-3d.html?${params.toString()}`;
+        }
+
+        function launchCpuQuest3D() {
+            if (!isGameUnlocked()) { renderGameGate(); return; }
+            const frame = document.getElementById('cpuQuestFrame');
+            const intro = document.getElementById('cpuQuestIntro');
+            const wrap = document.getElementById('cpuQuestFrameWrap');
+            if (!frame || !wrap) return;
+            const target = cpuQuestUrl();
+            if (!frame.src || !frame.src.includes('cpu-quest-3d.html')) frame.src = target;
+            if (intro) intro.classList.add('hide');
+            wrap.classList.remove('hide');
+            updateCpuQuestSummary();
+            const area = document.getElementById('mainContentArea');
+            if (area) area.scrollTop = 0;
+        }
+
+        function openCpuQuestNewTab() {
+            if (!isGameUnlocked()) return;
+            window.open(cpuQuestUrl(), '_blank', 'noopener');
+        }
+
+        function updateCpuQuestSummary(progress) {
+            const el = document.getElementById('cpuQuestSummary');
+            if (!el) return;
+            const p = progress || learningProgress.game3d || null;
+            if (!p) {
+                el.innerHTML = '<strong>Belum dimainkan.</strong><br>Mulai game untuk mencatat XP dan misi.';
+                return;
+            }
+            const stage = Number(p.stage || 0);
+            const xp = Number(p.xp || 0);
+            const done = !!p.completed;
+            el.innerHTML = `<strong>${done ? '✅ CPU stabil' : `Misi ${Math.min(stage,6)}/6`}</strong><br>XP: ${xp} · Jawaban benar: ${Number(p.correctAnswers||0)}`;
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.origin !== location.origin || !event.data) return;
+            if (event.data.type !== 'CPU_QUEST_PROGRESS' && event.data.type !== 'CPU_QUEST_COMPLETE') return;
+            const p = event.data.progress || {};
+            learningProgress.game3d = {
+                studentId: p.studentId || studentData.studentId,
+                name: p.name || studentData.name,
+                klass: p.klass || studentData.class,
+                stage: Number(p.stage || 0),
+                xp: Number(p.xp || 0),
+                completed: !!p.completed,
+                correctAnswers: Number(p.correctAnswers || 0),
+                wrongAnswers: Number(p.wrongAnswers || 0),
+                updatedAt: nowMs()
+            };
+            saveLearningProgress({ skipServer: true });
+            updateCpuQuestSummary(learningProgress.game3d);
+            if (event.data.type === 'CPU_QUEST_COMPLETE') {
+                showModal('CPU QUEST Selesai!', `Hebat ${studentData.name}! Kamu berhasil menstabilkan siklus CPU di dunia 3D dengan ${learningProgress.game3d.xp} XP.`, 'success');
+            }
+        });
 
         function gameShowScreen(id) {
             document.querySelectorAll('#cyberGameApp .game-screen').forEach(el => el.classList.add('hide'));
@@ -943,19 +1043,7 @@
 
         function getRuntimeIntegrity() { return crisisRuntime ? Math.max(0, Math.min(100, crisisRuntime.integrity)) : 100; }
         function updateGameHud() {
-            ensureCpuCrisisGameState();
-            const name = document.getElementById('gameHudName');
-            const score = document.getElementById('gameHudScore');
-            const level = document.getElementById('gameHudLevel');
-            const integrity = document.getElementById('gameHudIntegrity');
-            const combo = document.getElementById('gameCombo');
-            const bar = document.getElementById('gameIntegrityBar');
-            if (name) name.textContent = studentData.name || '-';
-            if (score) score.textContent = String(learningProgress.game.score || 0).padStart(4, '0');
-            if (level) level.textContent = learningProgress.game.completedMissions.length >= cpuCrisisMissions.length ? 'DONE' : String(currentCyberLevel).padStart(2, '0');
-            if (integrity) integrity.textContent = `${getRuntimeIntegrity()}%`;
-            if (combo) combo.textContent = `COMBO ×${crisisRuntime?.combo || 0}`;
-            if (bar) bar.style.width = `${getRuntimeIntegrity()}%`;
+            updateCpuQuestSummary();
         }
 
         function startCpuCrisis() { gameShowMap(); }
@@ -1303,15 +1391,22 @@
             gameShowMap();
         }
 
-        function showModal(title, message, type = "success") {
+        function showModal(title, message, type = "success", afterClose = null, actionLabel = 'Tutup & Lanjutkan') {
             const modal = document.getElementById("customModal");
             const modalTitle = document.getElementById("modalTitle");
             const modalMessage = document.getElementById("modalMessage");
             const modalIcon = document.getElementById("modalIcon");
             const modalContent = document.getElementById("modalContent");
+            const modalActionButton = document.getElementById('modalActionButton');
+
+            // Setiap modal menentukan sendiri apakah ada tindakan setelah ditutup.
+            // Ini mencegah callback lama ikut terpanggil pada modal berikutnya.
+            modalAfterCloseAction = typeof afterClose === 'function' ? afterClose : null;
+            modalActionLabel = actionLabel || 'Tutup & Lanjutkan';
 
             modalTitle.innerText = title;
             modalMessage.innerText = message;
+            if (modalActionButton) modalActionButton.innerHTML = `<i class="fas fa-arrow-right mr-2"></i>${modalActionLabel}`;
 
             if (type === "success") {
                 modalIcon.innerHTML = `<i class="fas fa-check-circle text-green-500 drop-shadow-md"></i>`;
@@ -1337,6 +1432,8 @@
         function closeModal() {
             const modal = document.getElementById("customModal");
             const modalContent = document.getElementById("modalContent");
+            const afterClose = modalAfterCloseAction;
+            modalAfterCloseAction = null;
             
             modal.classList.add("opacity-0");
             modalContent.classList.remove("scale-100");
@@ -1344,5 +1441,8 @@
             
             setTimeout(() => {
                 modal.classList.add("hide");
+                if (afterClose) {
+                    try { afterClose(); } catch (err) { console.error('Gagal melanjutkan tahap pembelajaran:', err); }
+                }
             }, 300); // Sinkron dengan durasi transition-opacity (300ms)
         }

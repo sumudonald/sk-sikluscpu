@@ -1,5 +1,5 @@
-AUDIT GITHUB PAGES — MPI SIKLUS CPU
-===================================
+AUDIT GITHUB PAGES — MPI SIKLUS CPU + CPU QUEST 3D
+===================================================
 
 Status: SIAP DIUPLOAD KE GITHUB PAGES
 
@@ -7,27 +7,32 @@ Pemeriksaan:
 - index.html berada di root repository: OK
 - CSS lokal css/style.css tersedia: OK
 - JavaScript lokal js/app.js tersedia: OK
-- Template khusus Google Apps Script (<? ... ?>): TIDAK ADA
+- Game 3D game/cpu-quest-3d.html tersedia: OK
+- Template khusus Google Apps Script: TIDAK ADA
 - Tailwind CDN runtime: TIDAK ADA
-- ID HTML duplikat: TIDAK ADA
-- Referensi file lokal yang hilang: TIDAK ADA
-- Fungsi onclick utama tanpa definisi: TIDAK ADA
-- Sintaks JavaScript (node --check): LOLOS
+- ID HTML duplikat pada MPI: TIDAK ADA
+- ID HTML duplikat pada game: TIDAK ADA
+- Sintaks js/app.js (node --check): LOLOS
+- Sintaks JavaScript game (node --check): LOLOS
 - Pilihan kelas IX-D: TIDAK ADA
 - Video YouTube ko5tV3hdgCw: TERPASANG
 - .nojekyll untuk GitHub Pages: TERSEDIA
+- Unlock game setelah 5 tahap belajar: DIPERTAHANKAN
+- Identitas MPI -> game melalui query parameter: TERPASANG
+- Progres game -> MPI melalui postMessage same-origin: TERPASANG
 
 PENYIMPANAN PROGRES
 -------------------
-Versi ini menggunakan localStorage agar langsung dapat dipakai tanpa backend.
-Progres tersimpan pada browser/perangkat yang sama. GitHub Pages sendiri tidak
-menyediakan database. Sinkronisasi lintas perangkat dapat ditambahkan kemudian
-menggunakan Firebase Firestore tanpa mengganti GitHub Pages sebagai hosting.
+Versi ini menggunakan localStorage. MPI menggunakan Kode Siswa/NIS sebagai bagian
+dari key progres. CPU QUEST 3D juga menggunakan Kode Siswa/NIS untuk progres game.
+Progres masih per browser/perangkat. Firebase dapat ditambahkan kemudian jika ingin
+sinkron lintas perangkat.
 
 DEPENDENSI ONLINE
 -----------------
 - Google Fonts
 - Font Awesome
 - YouTube
+- Three.js (jsDelivr) untuk game 3D
 
-CSS utama aplikasi tidak lagi bergantung pada Tailwind CDN.
+CSS utama aplikasi tidak memakai Tailwind CDN.

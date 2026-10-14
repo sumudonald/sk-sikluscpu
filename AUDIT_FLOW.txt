@@ -1,0 +1,22 @@
+AUDIT ALUR PEMBELAJARAN — 2026-10-08
+
+STATUS: DIPERBAIKI
+
+Masalah ditemukan:
+Versi sebelumnya menandai progres selesai, tetapi fungsi completion tidak memanggil perpindahan tab berikutnya.
+
+Perbaikan:
+1. Materi selesai -> modal menampilkan "Lanjut ke Video" -> setelah ditutup membuka Video.
+2. Video selesai -> "Lanjut ke Kuis" -> membuka Kuis.
+3. Kuis selesai -> "Lanjut ke HOTS" -> membuka HOTS.
+4. HOTS selesai -> "Lanjut ke Refleksi" -> membuka Refleksi.
+5. Refleksi selesai -> "Buka CPU QUEST 3D" -> membuka Game.
+6. Jika Materi/Video sudah pernah selesai lalu siswa kembali ke halaman tersebut, tombol berubah menjadi tombol lanjut sehingga tidak perlu mengulang checkpoint.
+7. Callback modal dibersihkan setiap kali modal baru dibuka untuk mencegah navigasi lama terpanggil secara tidak sengaja.
+
+Pemeriksaan teknis:
+- JavaScript: syntax OK (node --check)
+- Duplicate HTML ID: tidak ada
+- Referensi file lokal: lengkap
+- Struktur GitHub Pages: index.html + css/style.css + js/app.js
+- PROGRESS_SCHEMA_VERSION tidak dinaikkan agar progres siswa lama tetap kompatibel.

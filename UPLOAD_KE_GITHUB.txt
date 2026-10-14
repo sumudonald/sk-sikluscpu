@@ -1,12 +1,19 @@
-CARA CEPAT
-==========
+CARA CEPAT — CPU QUEST 3D
+========================
 1. Ekstrak ZIP ini.
-2. Buat repository GitHub baru.
-3. Upload semua isi folder hasil ekstrak ke repository (index.html harus berada di root).
-4. GitHub: Settings > Pages > Deploy from a branch > main > /(root) > Save.
-5. Tunggu sampai GitHub Pages memberi URL situs.
+2. Buka repository GitHub MPI Siklus CPU yang sudah Anda gunakan.
+3. Ganti/upload semua isi folder hasil ekstrak ke repository.
+4. Pastikan struktur berikut tetap ada:
+   index.html
+   css/style.css
+   js/app.js
+   game/cpu-quest-3d.html
+5. Settings > Pages tetap: Deploy from a branch > main > /(root).
+6. Setelah commit, tunggu deploy selesai lalu lakukan hard refresh.
 
-CATATAN PROGRES
-================
-Versi siap-upload ini memakai localStorage. Artinya progres tersimpan pada browser/perangkat yang sama.
-Untuk progres lintas perangkat, tahap berikutnya dapat ditambahkan Firebase Firestore.
+CATATAN
+=======
+- Game tetap terkunci sampai Materi, Video, Kuis, HOTS, dan Refleksi selesai.
+- Progres MPI dan CPU QUEST 3D disimpan di localStorage browser.
+- CPU QUEST 3D membutuhkan internet untuk memuat Three.js dari CDN.
+- Pada HP tersedia joystick dan tombol lompat; landscape lebih nyaman.

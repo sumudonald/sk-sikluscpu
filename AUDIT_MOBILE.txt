@@ -6,7 +6,7 @@ Fokus audit:
 - navbar 320–430 px
 - modal
 - materi/video/kuis/HOTS/refleksi
-- CPU CRISIS portrait + landscape
+- CPU QUEST 3D portrait + landscape
 - Mode Fokus
 - localStorage
 

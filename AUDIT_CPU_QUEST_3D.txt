@@ -1,0 +1,12 @@
+AUDIT CPU QUEST 3D
+
+- Game lama CPU CRISIS diganti dengan CPU QUEST 3D open-world.
+- Engine dasar berasal dari game 3D yang diberikan pengguna: kontrol WASD, joystick HP, lompat, minimap, XP, musik, kuis, progres lokal.
+- Materi game diubah menjadi Siklus CPU: PC, RAM, IR, Fetch, Decode, CU, register, ALU, STORE.
+- Game tetap terkunci sampai 5 tahap MPI selesai.
+- Identitas siswa diteruskan dari MPI ke game melalui query parameter.
+- Progres game dikirim kembali ke MPI dengan postMessage same-origin.
+- Tombol Mode Fokus dan Buka Tab Penuh tersedia.
+- Game memiliki tombol fullscreen sendiri; jika browser menolak, siswa dapat memakai Buka Tab Penuh/F11.
+- HP: joystick dan tombol lompat tersedia; render resolution/shadow diturunkan otomatis untuk perangkat sentuh kecil.
+- Three.js masih berasal dari CDN jsDelivr; koneksi internet diperlukan.
